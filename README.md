@@ -9,3 +9,11 @@ A new Flutter project.
 - uuid: ^3.0.7
 - font_awesome_flutter: ^10.4.0
 -  intl: ^0.18.1
+
+## Run project
+```bash
+git clone https://github.com/BrachettaMatteo/expanse_tracker.git
+cd expanse_tracker
+flutter create --platforms=android,ios .
+Flutter run ios
+```
