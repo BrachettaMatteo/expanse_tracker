@@ -25,7 +25,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeCostum().ligthThem,
+      theme: ThemeCostum().ligthTheme,
+      darkTheme: ThemeCostum().darkTheme,
       initialRoute: HomePage.route,
       onGenerateRoute: (settings) {
         final routes = {

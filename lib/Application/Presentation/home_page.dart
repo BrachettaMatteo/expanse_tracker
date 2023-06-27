@@ -82,16 +82,25 @@ class _HomePageState extends State<HomePage> {
           children: [
             Material(
               elevation: 20,
-              child: Container(
-                  color: Theme.of(context).primaryColor,
+              color: Theme.of(context).primaryColor,
+              child: Padding(
                   padding: const EdgeInsets.all(5.0),
                   child: SafeArea(
+                    bottom: false,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ListTile(
-                            title: const Text("This month",
-                                style: TextStyle(color: Colors.white70)),
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("This month",
+                                    style: TextStyle(color: Colors.white70)),
+                                IconButton(
+                                    onPressed: () => {_openSettings()},
+                                    icon: const Icon(FontAwesomeIcons.sliders))
+                              ],
+                            ),
                             subtitle: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -109,6 +118,9 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ],
                             )),
+                        const SizedBox(
+                          height: 15,
+                        ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -121,6 +133,9 @@ class _HomePageState extends State<HomePage> {
                                 label: "year", analitics: analiticsYear)
                           ],
                         ),
+                        const SizedBox(
+                          height: 15,
+                        )
                       ],
                     ),
                   )),
@@ -190,6 +205,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _getContainer({required String label, required double analitics}) {
     return Container(
+        width: MediaQuery.of(context).size.width * 0.3,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Theme.of(context).shadowColor,
@@ -209,13 +225,15 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 8),
             Text(
               label.toUpperCase(),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                color: Colors.green.shade100,
+                color: Colors.white,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ));
   }
+
+  void _openSettings() {}
 }

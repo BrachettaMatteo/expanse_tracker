@@ -18,10 +18,13 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
-  //TODO: add focus and validator
+  final FocusNode _focusNodeImport = FocusNode();
+  final FocusNode _focusNodeDescription = FocusNode();
   final TextEditingController _importController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   late final Cost _initCost;
+
+  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     _initCost = widget.args.elementCost;
@@ -38,6 +41,8 @@ class _EditPageState extends State<EditPage> {
   void dispose() {
     _importController.dispose();
     _descriptionController.dispose();
+    _focusNodeDescription.dispose();
+    _focusNodeImport.dispose();
     super.dispose();
   }
 
@@ -46,38 +51,59 @@ class _EditPageState extends State<EditPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            IconButton(
+              onPressed: () =>
+                  _initCost.import == 0 ? _createCost() : _updateCost(),
+              icon: const Icon(FontAwesomeIcons.floppyDisk),
+              color: Colors.green.shade500,
+            )
+          ],
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(
+              Icons.close,
+              color: Colors.red,
+            ),
+          )),
       body: InkWell(
+        focusColor: Colors.transparent,
+        highlightColor: Theme.of(context).primaryColor,
         onLongPress: () =>
             _initCost.import == 0 ? _createCost() : _updateCost(),
         child: _getInputForm(),
       ),
       floatingActionButton: _initCost.import > 0
-          ? FloatingActionButton(onPressed: () {
-              BlocProvider.of<ExpanseTrackerBloc>(context)
-                  .add(ExpanseTrackerEventRemoveCost(_initCost.id));
-              Navigator.pop(context);
-            })
+          ? FloatingActionButton(
+              child: const Icon(FontAwesomeIcons.solidTrashCan),
+              onPressed: () {
+                BlocProvider.of<ExpanseTrackerBloc>(context)
+                    .add(ExpanseTrackerEventRemoveCost(_initCost.id));
+                Navigator.pop(context);
+              })
           : null,
     );
   }
 
   Widget _getInputForm() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.4,
-            child: _getFieldImport(),
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.6,
-            child: _getInputDescription(),
-          ),
-        ],
+    return Form(
+      key: _formKey,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.4,
+              child: _getFieldImport(),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.4,
+              child: _getInputDescription(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -93,45 +119,64 @@ class _EditPageState extends State<EditPage> {
         _initCost.import = double.parse(_importController.text);
         BlocProvider.of<ExpanseTrackerBloc>(context)
             .add(ExpanseTrakerEventUpdateCost(_initCost.id, _initCost));
+        Navigator.of(context).pop();
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(_errorSnackBar());
     }
-    Navigator.of(context).pop();
   }
 
   void _createCost() {
-    if (_importController.text.isNotEmpty &&
-        double.parse(_importController.text) > 0) {
+    if (_formKey.currentState!.validate()) {
       _initCost.description = _descriptionController.text;
       _initCost.import = double.parse(_importController.text);
       BlocProvider.of<ExpanseTrackerBloc>(context)
           .add(ExpanseTrackerEventAddCost(_initCost));
       Navigator.of(context).pop();
     } else {
-      Navigator.of(context).pop();
+      _importController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(_errorSnackBar());
     }
   }
 
-  _getFieldImport() => TextField(
+  _getFieldImport() => TextFormField(
         keyboardType: TextInputType.number,
+        focusNode: _focusNodeImport,
+        textInputAction: TextInputAction.go,
         controller: _importController,
         style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
         textAlign: TextAlign.center,
         showCursor: true,
+        autocorrect: false,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "error import";
+          } else {
+            return double.parse(value) > 0 ? null : "import < 0";
+          }
+        },
+        onFieldSubmitted: (value) {
+          _focusNodeImport.unfocus();
+          FocusScope.of(context).requestFocus(_focusNodeDescription);
+        },
         decoration: InputDecoration(
-          prefixIcon: Icon(
+          prefix: Icon(
             FontAwesomeIcons.dollarSign,
             color: Theme.of(context).textTheme.bodyMedium!.color,
             size: 35,
           ),
           hintText: _initCost.import == 0
-              ? 'new cost'
+              ? 'import'
               : _initCost.import.toStringAsFixed(2),
           border: InputBorder.none,
         ),
       );
 
   _getInputDescription() => TextField(
+        autocorrect: false,
         textAlign: TextAlign.center,
+        textInputAction: TextInputAction.done,
+        focusNode: _focusNodeDescription,
         controller: _descriptionController,
         decoration: InputDecoration(
           hintText:
@@ -139,6 +184,19 @@ class _EditPageState extends State<EditPage> {
                   ? 'Enter a description'
                   : "",
           border: InputBorder.none,
+        ),
+      );
+
+  SnackBar _errorSnackBar() => SnackBar(
+        content: const Text('import not valid'),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(20),
+        elevation: 30,
+        action: SnackBarAction(
+          label: 'go home',
+          textColor: Colors.white70,
+          onPressed: () => Navigator.pop(context),
         ),
       );
 }
