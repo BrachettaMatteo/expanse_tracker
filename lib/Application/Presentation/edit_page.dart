@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:expanse_tracker/Application/BusinessLogic/bloc/expanse_tracker_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,24 +48,7 @@ class _EditPageState extends State<EditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          actions: [
-            IconButton(
-              onPressed: () =>
-                  _initCost.import == 0 ? _createCost() : _updateCost(),
-              icon: const Icon(FontAwesomeIcons.floppyDisk),
-              color: Colors.green.shade500,
-            )
-          ],
-          leading: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
-          )),
+      appBar: _appBar(),
       body: InkWell(
         focusColor: Colors.transparent,
         highlightColor: Theme.of(context).primaryColor,
@@ -94,14 +75,8 @@ class _EditPageState extends State<EditPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.4,
-              child: _getFieldImport(),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.4,
-              child: _getInputDescription(),
-            ),
+            _getFieldImport(),
+            _getInputDescription(),
           ],
         ),
       ),
@@ -111,7 +86,6 @@ class _EditPageState extends State<EditPage> {
   void _updateCost() {
     if (double.parse(_importController.text) != _initCost.import ||
         _descriptionController.text != _initCost.description) {
-      log(_initCost.toString());
       if (double.parse(_importController.text) > 0) {
         _initCost.description = _descriptionController.text.isEmpty
             ? _initCost.description
@@ -139,51 +113,55 @@ class _EditPageState extends State<EditPage> {
     }
   }
 
-  _getFieldImport() => TextFormField(
-        keyboardType: TextInputType.number,
-        focusNode: _focusNodeImport,
-        textInputAction: TextInputAction.go,
-        controller: _importController,
-        style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-        textAlign: TextAlign.center,
-        showCursor: true,
-        autocorrect: false,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "error import";
-          } else {
-            return double.parse(value) > 0 ? null : "import < 0";
-          }
-        },
-        onFieldSubmitted: (value) {
-          _focusNodeImport.unfocus();
-          FocusScope.of(context).requestFocus(_focusNodeDescription);
-        },
-        decoration: InputDecoration(
-          prefix: Icon(
-            FontAwesomeIcons.dollarSign,
-            color: Theme.of(context).textTheme.bodyMedium!.color,
-            size: 35,
+  _getFieldImport() => IntrinsicWidth(
+        child: TextFormField(
+          keyboardType: TextInputType.number,
+          focusNode: _focusNodeImport,
+          textInputAction: TextInputAction.go,
+          controller: _importController,
+          style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+          showCursor: true,
+          autocorrect: false,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "error import";
+            } else {
+              return double.parse(value) > 0 ? null : "import < 0";
+            }
+          },
+          onFieldSubmitted: (value) {
+            _focusNodeImport.unfocus();
+            FocusScope.of(context).requestFocus(_focusNodeDescription);
+          },
+          decoration: InputDecoration(
+            prefix: Icon(
+              FontAwesomeIcons.dollarSign,
+              color: Theme.of(context).textTheme.bodyMedium!.color,
+              size: 35,
+            ),
+            hintText: _initCost.import == 0
+                ? 'import'
+                : _initCost.import.toStringAsFixed(2),
+            border: InputBorder.none,
           ),
-          hintText: _initCost.import == 0
-              ? 'import'
-              : _initCost.import.toStringAsFixed(2),
-          border: InputBorder.none,
         ),
       );
 
-  _getInputDescription() => TextField(
-        autocorrect: false,
-        textAlign: TextAlign.center,
-        textInputAction: TextInputAction.done,
-        focusNode: _focusNodeDescription,
-        controller: _descriptionController,
-        decoration: InputDecoration(
-          hintText:
-              _initCost.description == null || _initCost.description!.isEmpty
-                  ? 'Enter a description'
-                  : "",
-          border: InputBorder.none,
+  _getInputDescription() => IntrinsicWidth(
+        child: TextField(
+          autocorrect: false,
+          textAlign: TextAlign.center,
+          textInputAction: TextInputAction.done,
+          focusNode: _focusNodeDescription,
+          controller: _descriptionController,
+          decoration: InputDecoration(
+            hintText:
+                _initCost.description == null || _initCost.description!.isEmpty
+                    ? 'Enter a description'
+                    : "",
+            border: InputBorder.none,
+          ),
         ),
       );
 
@@ -199,4 +177,23 @@ class _EditPageState extends State<EditPage> {
           onPressed: () => Navigator.pop(context),
         ),
       );
+
+  AppBar _appBar() => AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      actions: [
+        IconButton(
+          onPressed: () =>
+              _initCost.import == 0 ? _createCost() : _updateCost(),
+          icon: const Icon(FontAwesomeIcons.floppyDisk),
+          color: Colors.green.shade500,
+        )
+      ],
+      leading: IconButton(
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(
+          Icons.close,
+          color: Colors.red,
+        ),
+      ));
 }

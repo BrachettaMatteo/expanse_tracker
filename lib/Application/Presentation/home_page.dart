@@ -80,109 +80,8 @@ class _HomePageState extends State<HomePage> {
         }
         return Column(
           children: [
-            Material(
-              elevation: 20,
-              color: Theme.of(context).primaryColor,
-              child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ListTile(
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text("This month",
-                                    style: TextStyle(color: Colors.white70)),
-                                IconButton(
-                                    onPressed: () => {_openSettings()},
-                                    icon: const Icon(FontAwesomeIcons.sliders))
-                              ],
-                            ),
-                            subtitle: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  FontAwesomeIcons.dollarSign,
-                                  color: Colors.white,
-                                ),
-                                Text(
-                                  Utility.getFromatCost(number: analiticsMonth),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 30,
-                                  ),
-                                ),
-                              ],
-                            )),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _getContainer(
-                                label: "day", analitics: analiticsDay),
-                            _getContainer(
-                                label: "month", analitics: analiticsMonth),
-                            _getContainer(
-                                label: "year", analitics: analiticsYear)
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        )
-                      ],
-                    ),
-                  )),
-            ),
-            Expanded(
-              child: SafeArea(
-                top: false,
-                child: MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: ListView.separated(
-                      itemBuilder: (context, index) {
-                        Cost el = lsCost[index];
-                        return Dismissible(
-                          key: Key(el.id),
-                          onDismissed: (direction) {
-                            BlocProvider.of<ExpanseTrackerBloc>(context)
-                                .add(ExpanseTrackerEventRemoveCost(el.id));
-                          },
-                          background: Container(
-                            color: Colors.red,
-                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                            child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Icon(
-                                    FontAwesomeIcons.solidTrashCan,
-                                    color: Colors.white,
-                                  ),
-                                  Icon(
-                                    FontAwesomeIcons.solidTrashCan,
-                                    color: Colors.white,
-                                  ),
-                                ]),
-                          ),
-                          child: ElementViewCost(
-                            elementCost: el,
-                          ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) =>
-                          const Divider(),
-                      itemCount: lsCost.length),
-                ),
-              ),
-            ),
+            _header(),
+            _listElements(),
           ],
         );
       }),
@@ -235,5 +134,99 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
-  void _openSettings() {}
+  _header() => Material(
+        elevation: 20,
+        color: Theme.of(context).primaryColor,
+        child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _titleHeader(),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  _analiticsSection(),
+                  const SizedBox(
+                    height: 15,
+                  )
+                ],
+              ),
+            )),
+      );
+
+  _analiticsSection() => Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _getContainer(label: "day", analitics: analiticsDay),
+          _getContainer(label: "month", analitics: analiticsMonth),
+          _getContainer(label: "year", analitics: analiticsYear)
+        ],
+      );
+
+  _titleHeader() => ListTile(
+      title: const Text("This month", style: TextStyle(color: Colors.white70)),
+      subtitle: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Icon(
+            FontAwesomeIcons.dollarSign,
+            color: Colors.white,
+          ),
+          Text(
+            Utility.getFromatCost(number: analiticsMonth),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+            ),
+          ),
+        ],
+      ));
+
+  _listElements() => Expanded(
+        child: SafeArea(
+          top: false,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: ListView.separated(
+                itemBuilder: (context, index) {
+                  Cost el = lsCost[index];
+                  return Dismissible(
+                    key: Key(el.id),
+                    onDismissed: (direction) {
+                      BlocProvider.of<ExpanseTrackerBloc>(context)
+                          .add(ExpanseTrackerEventRemoveCost(el.id));
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Icon(
+                              FontAwesomeIcons.solidTrashCan,
+                              color: Colors.white,
+                            ),
+                            Icon(
+                              FontAwesomeIcons.solidTrashCan,
+                              color: Colors.white,
+                            ),
+                          ]),
+                    ),
+                    child: ElementViewCost(
+                      elementCost: el,
+                    ),
+                  );
+                },
+                separatorBuilder: (BuildContext context, int index) =>
+                    const Divider(),
+                itemCount: lsCost.length),
+          ),
+        ),
+      );
 }
